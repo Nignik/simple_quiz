@@ -1,4 +1,4 @@
-czasowniki = {
+questions = {
     "piec": "backen buk gebacken",
     "Zaczynac": "",
     "gryzc": "beisen biss gebissen",

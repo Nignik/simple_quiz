@@ -1,51 +1,34 @@
+import pandas
 import random
-import importlib.util
-import sys
-spec = importlib.util.spec_from_file_location("czaswoniki", "tests/niemiecki_czasowniki.py")
-test = importlib.util.module_from_spec(spec)
-sys.modules["czasowniki"] = test
-spec.loader.exec_module(test)
-czasowniki = test.czasowniki.copy()
 
-def get_question():
-    question = random.choice(list(czasowniki.keys()))
-    return question
+class Quiz:
+    def __init__(self, quiz_name):
+        self.quiz_name = quiz_name
+        self.current_score = 0
+        self.data = None
+        self.question = None
+        self.answer = None
+        self.init_data()
 
-def get_answer(question):
-    answer = czasowniki[question]
-    return answer
+    def init_data(self):
+        try:
+            self.data = pandas.read_csv("tests/" + self.quiz_name + ".csv")
+        except FileNotFoundError:
+            print(f"{self.quiz_name}.csv not found, try different quiz name")
 
-def get_input(question):
-    user_input = input(f"{question}: ")
-    return user_input
+    def next_question(self):
+        question_nr = random.randint(0, len(self.data["question"].to_list()) - 1)
+        self.question = self.data["question"][question_nr]
+        self.answer = self.data["answer"][question_nr].strip()
 
-def check(input, answer):
-    return input == answer
-
-def print_good():
-    print("Odpowiedz poprawna")
-    
-def print_bad(answer):
-    print(f"Odpowiedz bledna, prawidlowa odpowiedz to: {answer}")
-
-
-def main():
-    global czasowniki
-    
-    while True:
-        question = get_question()
-        answer = get_answer(question)
-        user_input = get_input(question)
-        
-        if check(user_input, answer):
-            print_good()
-            del czasowniki[question]
-            if len(czasowniki) == 0:
-                czasowniki = test.czasowniki.copy()
+    def check_answer(self, answer):
+        if answer == self.answer:
+            return True
         else:
-            print_bad(answer)
-        
-    
+            return False
 
-if __name__ == "__main__":
-    main()
+
+
+
+
+
