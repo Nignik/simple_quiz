@@ -7,6 +7,12 @@ def show_commands():
     "(quiz name)": starts quiz of name (quiz name)
     """)
 
+def show_mode_menu():
+    print("""
+    1: normal_mode
+    2: double_question_mode
+    """)
+
 def menu():
     directory = os.getcwd() + "\\tests"
 

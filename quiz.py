@@ -1,5 +1,6 @@
 import pandas
 import random
+import time
 
 class Quiz:
     def __init__(self, quiz_name):
@@ -17,6 +18,7 @@ class Quiz:
             print(f"{self.quiz_name}.csv not found, try different quiz name")
 
     def next_question(self):
+        random.seed(time.time())
         question_nr = random.randint(0, len(self.data["question"].to_list()) - 1)
         self.question = self.data["question"][question_nr]
         self.answer = self.data["answer"][question_nr].strip()
