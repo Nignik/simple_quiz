@@ -3,6 +3,7 @@ import pandas
 import platform
 import os
 import random
+import time
 from colorama import init, Fore, Back, Style
 from quiz import Quiz
 
@@ -13,7 +14,6 @@ def clear_console():
         case "Linux":
             os.system("clear")
 
-
 class Brain:
     def __init__(self):
         self.quiz = None
@@ -22,7 +22,9 @@ class Brain:
     def begin(self):
         print("What quiz would you like to play?")
         user_interface.menu()
+
         quiz_name = input()
+
         self.quiz = Quiz(quiz_name)
         try:
             self.best_score = pandas.read_csv("data/best_scores.csv").to_dict()[quiz_name]
@@ -37,23 +39,43 @@ class Brain:
 
         match game_mode:
             case "1":
-                self.begin_normal_mode()
+                self.begin_non_repeat_mode()
             case "2":
                 self.begin_double_mode()
-
-    def begin_normal_mode(self):
-        while self.ask_question():
-            continue
 
     def begin_double_mode(self):
         while self.ask_double_question():
             continue
 
+    def begin_non_repeat_mode(self):
+        while self.ask_non_repeat_question():
+            continue
+
+    def ask_non_repeat_question(self):
+        self.quiz.set_question_next()
+        print(Fore.CYAN + self.quiz.question + Fore.WHITE)
+        answer = input()
+
+        match answer:
+            case "quit":
+                return False
+
+        clear_console()
+
+        if self.quiz.check_answer(answer):
+            print(Fore.WHITE + "Correct: " + Fore.GREEN + self.quiz.answer)
+        else:
+            print(Fore.WHITE + "Correct: " + Fore.GREEN + self.quiz.answer)
+            print(Fore.WHITE + "Incorrect: " + Fore.RED + answer)
+        print(Fore.WHITE)
+
+        return True
+
     def ask_double_question(self):
-        self.quiz.next_question()
+        self.quiz.set_question_next()
         question1 = self.quiz.question
         answer1 = self.quiz.answer
-        self.quiz.next_question()
+        self.quiz.set_question_next()
         question2 = self.quiz.question
         answer2 = self.quiz.answer
 
@@ -99,24 +121,4 @@ class Brain:
 
         return True
 
-
-    def ask_question(self):
-        self.quiz.next_question()
-        print(Fore.CYAN + self.quiz.question + Fore.WHITE)
-        answer = input()
-
-        match answer:
-            case "quit":
-                return False
-
-        clear_console()
-
-        if self.quiz.check_answer(answer):
-            print(Fore.WHITE + "Correct: " + Fore.GREEN + self.quiz.answer)
-        else:
-            print(Fore.WHITE + "Correct: " + Fore.GREEN + self.quiz.answer)
-            print(Fore.WHITE + "Incorrect: " + Fore.RED + answer)
-        print(Fore.WHITE)
-
-        return True
 

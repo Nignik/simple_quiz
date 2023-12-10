@@ -9,7 +9,7 @@ def show_commands():
 
 def show_mode_menu():
     print("""
-    1: normal_mode
+    1: non_repeat_mode
     2: double_question_mode
     """)
 
