@@ -12,10 +12,7 @@ class Quiz:
         self.init_data()
 
     def init_data(self):
-        try:
-            self.data = pandas.read_csv("tests/" + self.quiz_name)
-        except FileNotFoundError:
-            print(f"{self.quiz_name}.csv not found, try different quiz name")
+        self.data = pandas.read_csv("tests/" + self.quiz_name)
 
     def set_question_random(self):
         self.question_nr = random.randint(0, len(self.data["question"].to_list()))

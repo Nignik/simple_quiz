@@ -1,18 +1,13 @@
 import user_interface
-import pandas
-import platform
-import os
 import random
-import time
 from colorama import init, Fore, Back, Style
 from quiz import Quiz
 
-def clear_console():
-    match platform.system():
-        case "Windows":
-            os.system("cls")
-        case "Linux":
-            os.system("clear")
+def check_answer(user_answer, correct_answer):
+    if user_answer == correct_answer:
+        user_interface.print_correct(user_answer)
+    else:
+        user_interface.print_incorrect(user_answer, correct_answer)
 
 class Brain:
     def __init__(self):
@@ -20,22 +15,18 @@ class Brain:
         self.best_score = None
 
     def begin(self):
-        print("What quiz would you like to play?")
-        user_interface.menu()
+        quiz_name = user_interface.choose_quiz()
 
-        quiz_name = input()
+        success = False
+        while not success:
+            try:
+                self.quiz = Quiz(quiz_name)
+                success = True
+            except FileNotFoundError:
+                print(Fore.RED + quiz_name + ".csv not found, try different quiz name" + Fore.WHITE)
+                quiz_name = user_interface.choose_quiz()
 
-        self.quiz = Quiz(quiz_name)
-        try:
-            self.best_score = pandas.read_csv("data/best_scores.csv").to_dict()[quiz_name]
-        except KeyError:
-            print(f"best_scores.csv doesn't contain a best score for that quiz")
-
-        clear_console()
-
-        print("choose game mode")
-        user_interface.show_mode_menu()
-        game_mode = input()
+        game_mode = user_interface.choose_mode()
 
         match game_mode:
             case "1":
@@ -43,81 +34,48 @@ class Brain:
             case "2":
                 self.begin_double_mode()
 
-    def begin_double_mode(self):
-        while self.ask_double_question():
-            continue
-
     def begin_non_repeat_mode(self):
         while self.ask_non_repeat_question():
             continue
 
+    def begin_double_mode(self):
+        while self.ask_double_question():
+            continue
+
+
     def ask_non_repeat_question(self):
         self.quiz.set_question_next()
-        print(Fore.CYAN + self.quiz.question + Fore.WHITE)
-        answer = input()
+        question = self.quiz.question
+        correct_answer = self.quiz.answer
 
-        match answer:
-            case "quit":
-                return False
+        user_interface.ask_question(question)
+        user_answer = user_interface.take_input()
 
-        clear_console()
-
-        if self.quiz.check_answer(answer):
-            print(Fore.WHITE + "Correct: " + Fore.GREEN + self.quiz.answer)
-        else:
-            print(Fore.WHITE + "Correct: " + Fore.GREEN + self.quiz.answer)
-            print(Fore.WHITE + "Incorrect: " + Fore.RED + answer)
-        print(Fore.WHITE)
+        check_answer(user_answer, correct_answer)
 
         return True
 
     def ask_double_question(self):
         self.quiz.set_question_next()
         question1 = self.quiz.question
-        answer1 = self.quiz.answer
+        correct_answer1 = self.quiz.answer
         self.quiz.set_question_next()
         question2 = self.quiz.question
-        answer2 = self.quiz.answer
+        correct_answer2 = self.quiz.answer
 
-        cnt_question1 = 0
-        cnt_question2 = 0
+        question_set = [(question1, correct_answer1) for i in range(3)]
+        question_set.extend([(question2, correct_answer2) for i in range(3)])
+        random.shuffle(question_set)
 
-        while cnt_question1 <= 3 or cnt_question2 <= 3:
-            question = random.randint(1, 2)
+        for question, correct_answer in question_set:
+            user_interface.ask_question(question)
 
-            if question == 1 and cnt_question1 <= 3:
-                cnt_question1 += 1
+            user_answer = user_interface.take_input()
+            if not user_answer:
+                return False
 
-                print(Fore.CYAN + question1 + Fore.WHITE)
-                answer = input()
-                if answer == "quit":
-                    return False
+            check_answer(user_answer, correct_answer)
 
-                clear_console()
-
-                if answer == answer1:
-                    print(Fore.WHITE + "correct: " + Fore.GREEN + answer1)
-                    print(Fore.WHITE + "answer:  " + Fore.GREEN + answer)
-                else:
-                    print(Fore.WHITE + "correct: " + Fore.GREEN + answer1)
-                    print(Fore.WHITE + "answer:  " + Fore.RED + answer)
-
-            elif question == 2 and cnt_question2 <= 3:
-                cnt_question2 += 1
-
-                print(Fore.CYAN + question2 + Fore.WHITE)
-                answer = input()
-                if answer == "quit":
-                    return False
-
-                clear_console()
-
-                if answer == answer2:
-                    print(Fore.WHITE + "correct: " + Fore.GREEN + answer2)
-                    print(Fore.WHITE + "answer:  " + Fore.GREEN + answer)
-                else:
-                    print(Fore.WHITE + "correct: " + Fore.GREEN + answer2)
-                    print(Fore.WHITE + "answer:  " + Fore.RED + answer)
 
         return True
 

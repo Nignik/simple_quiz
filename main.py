@@ -1,4 +1,3 @@
-import sys
 from brain import Brain
 def main():
    brain = Brain()
